@@ -1,7 +1,3 @@
-# This file sets up the connection to our SQLite database.
-# SQLite is a lightweight database that stores everything in a single file (finance.db).
-# We use SQLAlchemy as the bridge between Python and the database.
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
