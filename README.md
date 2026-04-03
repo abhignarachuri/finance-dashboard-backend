@@ -15,6 +15,17 @@ Backend system for managing financial records, user roles, access permissions, a
 - SQLite
 - Pydantic
 
+## Approach
+The backend is designed using a modular structure to separate responsibilities clearly.
+
+* Routes handle incoming API requests
+* Services contain business logic
+* Models define database structure
+* Schemas validate request and response data
+
+The system follows role-based access control where permissions are enforced before executing protected operations.
+Financial records are stored in a persistent database and summary endpoints calculate aggregated dashboard insights such as income, expenses, and balance.
+
 ## Installation
 git clone <repo-url>
 cd finance-dashboard
