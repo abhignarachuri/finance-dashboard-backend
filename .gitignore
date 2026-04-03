@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+env/
+.env/
+.venv/
+
+# Environment variables
+.env
+.env.*
+
+# SQLite database — contains real data, should never be committed
+*.db
+*.sqlite3
+
+# Test artifacts
+test_all.py
+
+# Logs
+*.log
+server.log
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
