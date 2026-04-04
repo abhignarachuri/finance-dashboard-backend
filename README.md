@@ -50,22 +50,22 @@ It supports:
 ```
 finance_dashboard_backend/
 ├── app/
-│   ├── main.py                 # Entry point — starts the app, registers routes, seeds admin
-│   ├── database.py             # Database engine, session factory, and Base class
-│   ├── models.py               # SQLAlchemy table definitions (User, FinanceRecord)
-│   ├── schemas.py              # Pydantic schemas for input validation and response shaping
-│   ├── auth.py                 # Password hashing and token creation/lookup
-│   ├── crud.py                 # All database read and write operations
-│   ├── dependencies.py         # Token extraction, user identity, and role guards
+│   ├── main.py                 
+│   ├── database.py           
+│   ├── models.py               
+│   ├── schemas.py              
+│   ├── auth.py                
+│   ├── crud.py                 
+│   ├── dependencies.py        
 │   ├── routes/
-│   │   ├── users.py            # /users endpoints (login, create, list, update)
-│   │   ├── finance.py          # /finance endpoints (CRUD + filtering)
-│   │   └── dashboard.py        # /dashboard/summary endpoint
+│   │   ├── users.py            
+│   │   ├── finance.py         
+│   │   └── dashboard.py      
 │   └── services/
-│       └── summary_service.py  # Aggregation logic for the dashboard
-├── finance.db                  # SQLite database file (auto-created on first run)
-├── requirements.txt            # Python dependencies
-├── test_all.py                 # End-to-end test script
+│       └── summary_service.py  
+├── finance.db                  
+├── requirements.txt            
+├── test_all.py                 
 └── .gitignore
 ```
 
@@ -75,10 +75,10 @@ finance_dashboard_backend/
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.10
 - pip
 
----
+
 
 ### Step 1 — Clone the repository
 
@@ -100,12 +100,9 @@ python -m venv venv
 Activate it:
 
 ```bash
-# Windows
 venv\Scripts\activate
 
-# macOS / Linux
-source venv/bin/activate
-```
+
 
 ---
 
@@ -163,7 +160,7 @@ Make sure the server is running, then in a separate terminal:
 python test_all.py
 ```
 
-This runs 42 end-to-end tests covering all features — authentication, user management, role access control, finance CRUD, validation, and dashboard summary.
+This runs 42 end-to-end tests covering all features authentication, user management, role access control, finance CRUD, validation, and dashboard summary.
 
 ---
 
