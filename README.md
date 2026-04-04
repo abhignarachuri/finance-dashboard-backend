@@ -34,8 +34,8 @@ pip install -r requirements.txt
 ## Run Project
 uvicorn main:app --reload
 
-## Base URL
-http://localhost:8000
+## Base URL-Local Environment
+http://127.0.0.1:8000/docs
 
 ## Main Endpoints
 /users
