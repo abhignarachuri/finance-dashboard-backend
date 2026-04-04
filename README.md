@@ -28,20 +28,20 @@ It handles user management, financial record tracking, role-based access, and a 
 ```
 finance_dashboard_backend/
 ├── app/
-│   ├── main.py               # starts the app, registers routes, seeds admin user
-│   ├── database.py           # database connection and session setup
-│   ├── models.py             # database table definitions
-│   ├── schemas.py            # request and response validation
-│   ├── auth.py               # password hashing and token management
-│   ├── crud.py               # all database read/write logic
-│   ├── dependencies.py       # auth checks and role guards
+│   ├── main.py               
+│   ├── database.py           
+│   ├── models.py             
+│   ├── schemas.py            
+│   ├── auth.py               
+│   ├── crud.py              
+│   ├── dependencies.py      
 │   ├── routes/
-│   │   ├── users.py          # user endpoints
-│   │   ├── finance.py        # finance record endpoints
-│   │   └── dashboard.py      # dashboard summary endpoint
+│   │   ├── users.py          
+│   │   ├── finance.py        
+│   │   └── dashboard.py      
 │   └── services/
-│       └── summary_service.py  # dashboard aggregation logic
-├── finance.db                # SQLite database (auto-created on first run)
+│       └── summary_service.py 
+├── finance.db               
 └── requirements.txt
 ```
 
@@ -65,11 +65,8 @@ python -m venv venv
 Activate it:
 
 ```bash
-# Windows
 venv\Scripts\activate
 
-# macOS / Linux
-source venv/bin/activate
 ```
 
 ### 3. Install dependencies
