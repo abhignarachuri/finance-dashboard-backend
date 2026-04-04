@@ -4,94 +4,59 @@ A backend REST API for managing financial records with role-based access control
 
 ---
 
-## Table of Contents
+## What this project does
 
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Setup & Installation](#setup--installation)
-- [Authentication](#authentication)
-- [Roles & Permissions](#roles--permissions)
-- [API Reference](#api-reference)
-- [Validation Rules](#validation-rules)
-- [How the System Works](#how-the-system-works)
-- [Assumptions Made](#assumptions-made)
-- [Tradeoffs Considered](#tradeoffs-considered)
+This API powers a finance dashboard where different users can view or manage financial data depending on their role. Some users can only read summaries. Others can dig into records. Admins have full control.
+
+It handles user management, financial record tracking, role-based access, and a dashboard that gives you totals, trends, and breakdowns — all out of the box.
 
 ---
 
-## Overview
+## Tech stack
 
-This API powers a finance dashboard where different types of users can view or manage financial data depending on their role.
-
-It supports:
-- Creating and managing users with different access levels
-- Logging income and expense records
-- Filtering records by category, type, and date range
-- Retrieving aggregated summaries — total income, net balance, category breakdowns, and monthly trends
-
----
-
-## Tech Stack
-
-| Technology | Version | Purpose |
-|---|---|---|
-| Python | 3.10+ | Core language |
-| FastAPI | 0.111.0 | Web framework and API routing |
-| Uvicorn | 0.29.0 | ASGI server that runs FastAPI |
-| SQLAlchemy | 2.0.30 | ORM — bridges Python models and SQLite |
-| Pydantic | 2.7.1 | Request and response validation |
-| SQLite | Built-in | Lightweight file-based database |
+- Python 3.10+
+- FastAPI 0.111.0
+- Uvicorn 0.29.0
+- SQLAlchemy 2.0.30
+- Pydantic 2.7.1
+- SQLite (built-in, no setup needed)
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
 finance_dashboard_backend/
 ├── app/
-│   ├── main.py                 
-│   ├── database.py           
-│   ├── models.py               
-│   ├── schemas.py              
-│   ├── auth.py                
-│   ├── crud.py                 
-│   ├── dependencies.py        
+│   ├── main.py               # starts the app, registers routes, seeds admin user
+│   ├── database.py           # database connection and session setup
+│   ├── models.py             # database table definitions
+│   ├── schemas.py            # request and response validation
+│   ├── auth.py               # password hashing and token management
+│   ├── crud.py               # all database read/write logic
+│   ├── dependencies.py       # auth checks and role guards
 │   ├── routes/
-│   │   ├── users.py            
-│   │   ├── finance.py         
-│   │   └── dashboard.py      
+│   │   ├── users.py          # user endpoints
+│   │   ├── finance.py        # finance record endpoints
+│   │   └── dashboard.py      # dashboard summary endpoint
 │   └── services/
-│       └── summary_service.py  
-├── finance.db                  
-├── requirements.txt            
-├── test_all.py                 
-└── .gitignore
+│       └── summary_service.py  # dashboard aggregation logic
+├── finance.db                # SQLite database (auto-created on first run)
+└── requirements.txt
 ```
 
 ---
 
-## Setup & Installation
+## Getting started
 
-### Prerequisites
-
-- Python 3.10
-- pip
-
-
-
-### Step 1 — Clone the repository
+### 1. Clone the repo
 
 ```bash
 git clone https://github.com/your-username/finance_dashboard_backend.git
 cd finance_dashboard_backend
 ```
 
----
-
-### Step 2 — Create a virtual environment
-
-A virtual environment keeps the project's dependencies isolated from the rest of your system.
+### 2. Create a virtual environment
 
 ```bash
 python -m venv venv
@@ -100,166 +65,105 @@ python -m venv venv
 Activate it:
 
 ```bash
+# Windows
 venv\Scripts\activate
 
+# macOS / Linux
+source venv/bin/activate
+```
 
-
----
-
-### Step 3 — Install dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-This installs FastAPI, Uvicorn, SQLAlchemy, and Pydantic at the exact versions the project was built with.
-
----
-
-### Step 4 — Start the server
+### 4. Start the server
 
 ```bash
 python -m uvicorn app.main:app --reload
 ```
 
-> If your terminal says `uvicorn: command not found`, use `python -m uvicorn app.main:app --reload` instead. This is common on Windows.
+The API runs at `http://127.0.0.1:8000`
+Swagger docs are at `http://127.0.0.1:8000/docs`
 
-| Environment | Base URL |
-|---|---|
-| Local Development | `http://127.0.0.1:8000` |
-| Production (example) | `https://your-domain.com` |
+> `127.0.0.1` is your own machine. The server only runs while this command is active. The `--reload` flag automatically restarts it when you save a file.
 
-- The API will be live at `http://127.0.0.1:8000`
-- Interactive Swagger docs are at `http://127.0.0.1:8000/docs`
-- The `--reload` flag restarts the server automatically when you change a file
+### 5. Log in
 
-> `127.0.0.1` means your own machine (also called `localhost`). This URL only works while the server is running on your computer.
+A default admin account is created automatically on first startup. Use it to get a token and start making requests.
 
----
-
-### Step 5 — Log in with the default admin account
-
-On first startup, a default admin account is automatically created:
-
-| Field | Value |
-|---|---|
-| Username | `admin` |
-| Password | `admin123` |
-
-Call `POST /users/login` with these credentials to get your token, then use that token in the `Authorization` header for all subsequent requests.
-
-> Change this password before deploying to any public environment.
-
----
-
-### Running the Tests
-
-Make sure the server is running, then in a separate terminal:
-
-```bash
-python test_all.py
-```
-
-This runs 42 end-to-end tests covering all features authentication, user management, role access control, finance CRUD, validation, and dashboard summary.
+> Change this password before putting this anywhere public.
 
 ---
 
 ## Authentication
 
-This API uses **Bearer Token** authentication.
-
-### How it works
+This API uses Bearer Token auth.
 
 1. Call `POST /users/login` with your username and password
-2. You receive a token in the response
-3. Send that token in the `Authorization` header on every subsequent request
+2. Copy the `token` from the response
+3. Include it in every request header like this:
 
 ```
 Authorization: Bearer <your_token>
 ```
 
-### Using Swagger UI
+### In Swagger
 
-1. Open `http://127.0.0.1:8000/docs` in your browser
-2. Call `POST /users/login` → click **Try it out** → enter credentials → click **Execute**
-3. Copy the `token` value from the response
-4. Click the 🔒 **Authorize** button at the top right of the Swagger page
-5. Paste your token in the **Value** field — Swagger adds `Bearer` automatically
-6. Click **Authorize** → **Close** — all subsequent requests will include your token
+1. Open `http://127.0.0.1:8000/docs`
+2. Call `POST /users/login` → Try it out → enter credentials → Execute
+3. Copy the token from the response
+4. Click the **Authorize** button at the top right
+5. Paste your token — Swagger adds `Bearer` automatically
+6. Click Authorize → Close
 
-> Tokens live in server memory. They are cleared every time the server restarts. Log in again after each restart to get a fresh token.
+Tokens are stored in memory and cleared on every server restart. Just log in again to get a new one.
 
 ---
 
-## Roles & Permissions
+## Roles
 
-There are three roles. Each one has a different level of access.
+Three roles, each with different access:
 
 | Action | Viewer | Analyst | Admin |
 |---|:---:|:---:|:---:|
 | View dashboard summary | yes | yes | yes |
-| View finance records (list) | no | yes | yes |
-| View finance record (single) | no | yes | yes |
-| Create finance records | no | no | yes |
-| Update finance records | no | no | yes |
-| Delete finance records | no | no | yes |
-| Create users | no | no | yes |
-| List all users | no | no | yes |
-| Update user role or status | no | no | yes |
+| View finance records | no | yes | yes |
+| Create / update / delete records | no | no | yes |
+| Create / list / update users | no | no | yes |
 
 ---
 
-## API Reference
+## API reference
 
-### Health Check
+### Health check
 
-#### `GET /`
-
-Confirms the server is running. No authentication required.
-
-**Response**
-```json
-{
-  "message": "Finance Dashboard API is running"
-}
 ```
+GET /
+```
+No auth needed. Just confirms the server is up.
 
 ---
 
 ### Users
 
-#### `POST /users/login`
-
-Authenticates a user and returns a session token. No authentication required.
-
-**Request Body**
-```json
-{
-  "username": "admin",
-  "password": "admin123"
-}
+#### Login
 ```
-
-**Response**
-```json
-{
-  "token": "a3f9c2d1...",
-  "role": "admin"
-}
+POST /users/login
 ```
-
-| Status | Reason |
-|---|---|
-| 401 | Wrong username or password |
-| 403 | Account is deactivated |
+```json
+{ "username": "admin", "password": "admin123" }
+```
+Returns a token and the user's role. No auth required.
 
 ---
 
-#### `POST /users/`
-
-Creates a new user. Admin only.
-
-**Request Body**
+#### Create a user
+```
+POST /users/
+```
+Admin only.
 ```json
 {
   "username": "jane",
@@ -267,83 +171,36 @@ Creates a new user. Admin only.
   "role": "analyst"
 }
 ```
-
-- `role` is optional and defaults to `viewer` if not provided
-- Accepted role values: `viewer`, `analyst`, `admin`
-
-**Response**
-```json
-{
-  "id": 2,
-  "username": "jane",
-  "role": "analyst",
-  "is_active": true
-}
-```
-
-| Status | Reason |
-|---|---|
-| 400 | Username already exists |
-| 403 | Caller is not an admin |
-| 422 | Invalid role or missing required fields |
+`role` defaults to `viewer` if not provided. Accepted values: `viewer`, `analyst`, `admin`.
 
 ---
 
-#### `GET /users/`
+#### List all users
+```
+GET /users/
+```
+Admin only. Returns all users.
 
-Returns a list of all users in the system. Admin only.
+---
 
-**Response**
+#### Update a user
+```
+PATCH /users/{user_id}
+```
+Admin only. Update role, active status, or both. All fields optional.
 ```json
-[
-  {
-    "id": 1,
-    "username": "admin",
-    "role": "admin",
-    "is_active": true
-  },
-  {
-    "id": 2,
-    "username": "jane",
-    "role": "analyst",
-    "is_active": true
-  }
-]
+{ "role": "viewer", "is_active": false }
 ```
 
 ---
 
-#### `PATCH /users/{user_id}`
+### Finance records
 
-Updates a user's role or active status. Admin only. All fields are optional — only include what you want to change.
-
-**URL Parameter**
-- `user_id` — the ID of the user to update
-
-**Request Body**
-```json
-{
-  "role": "viewer",
-  "is_active": false
-}
+#### Create a record
 ```
-
-**Response** — returns the updated user object
-
-| Status | Reason |
-|---|---|
-| 404 | User not found |
-| 403 | Caller is not an admin |
-
----
-
-### Finance Records
-
-#### `POST /finance/`
-
-Creates a new income or expense record. Admin only.
-
-**Request Body**
+POST /finance/
+```
+Admin only.
 ```json
 {
   "amount": 5000.00,
@@ -353,279 +210,125 @@ Creates a new income or expense record. Admin only.
   "notes": "January salary"
 }
 ```
-
-- `type` must be `income` or `expense`
-- `amount` must be greater than zero
-- `notes` is optional
-- `date` must be in `YYYY-MM-DD` format
-
-**Response**
-```json
-{
-  "id": 1,
-  "amount": 5000.00,
-  "type": "income",
-  "category": "salary",
-  "date": "2024-01-15",
-  "notes": "January salary"
-}
-```
+`notes` is optional. `type` must be `income` or `expense`. `amount` must be greater than zero.
 
 ---
 
-#### `GET /finance/`
-
-Returns finance records. Analyst and admin only. All query parameters are optional — combine them to narrow results.
-
-**Query Parameters**
-
-| Parameter | Type | Description |
-|---|---|---|
-| `category` | string | Filter by category name (e.g. `salary`, `rent`) |
-| `type` | string | Filter by `income` or `expense` |
-| `start_date` | date | Include records on or after this date (`YYYY-MM-DD`) |
-| `end_date` | date | Include records on or before this date (`YYYY-MM-DD`) |
-
-**Example**
+#### List records
 ```
-GET /finance/?type=expense&start_date=2024-01-01&end_date=2024-01-31
+GET /finance/
 ```
+Analyst and admin only. All filters are optional:
 
-**Response** — list of matching records, sorted newest first
-
----
-
-#### `GET /finance/{record_id}`
-
-Returns a single finance record by its ID. Analyst and admin only.
-
-**URL Parameter**
-- `record_id` — the ID of the record
-
-| Status | Reason |
+| Param | Description |
 |---|---|
-| 404 | Record not found |
+| `category` | filter by category name |
+| `type` | `income` or `expense` |
+| `start_date` | on or after this date (YYYY-MM-DD) |
+| `end_date` | on or before this date (YYYY-MM-DD) |
+
+Results are sorted newest first.
 
 ---
 
-#### `PATCH /finance/{record_id}`
-
-Updates one or more fields on an existing record. Admin only. All fields are optional.
-
-**Request Body**
-```json
-{
-  "amount": 5500.00,
-  "category": "freelance"
-}
+#### Get a single record
 ```
-
-**Response** — returns the updated record
-
-| Status | Reason |
-|---|---|
-| 404 | Record not found |
-| 422 | Invalid field value (e.g. negative amount) |
+GET /finance/{record_id}
+```
+Analyst and admin only.
 
 ---
 
-#### `DELETE /finance/{record_id}`
-
-Permanently deletes a finance record. Admin only.
-
-**Response**
-```json
-{
-  "detail": "Record deleted"
-}
+#### Update a record
 ```
+PATCH /finance/{record_id}
+```
+Admin only. All fields optional.
 
-| Status | Reason |
-|---|---|
-| 404 | Record not found |
+---
+
+#### Delete a record
+```
+DELETE /finance/{record_id}
+```
+Admin only. Permanently removes the record.
 
 ---
 
 ### Dashboard
 
-#### `GET /dashboard/summary`
-
-Returns aggregated financial data. Available to all roles including viewer.
-
-**Response**
-```json
-{
-  "total_income": 9500.00,
-  "total_expenses": 1500.00,
-  "net_balance": 8000.00,
-  "category_totals": {
-    "salary": 9500.00,
-    "rent": 1200.00,
-    "groceries": 300.00
-  },
-  "recent_transactions": [
-    {
-      "id": 4,
-      "amount": 4500.00,
-      "type": "income",
-      "category": "salary",
-      "date": "2024-02-15",
-      "notes": null
-    }
-  ],
-  "monthly_trends": {
-    "2024-01": { "income": 5000.00, "expense": 1200.00 },
-    "2024-02": { "income": 4500.00, "expense": 300.00 }
-  }
-}
 ```
+GET /dashboard/summary
+```
+Available to all roles. Returns:
 
-| Field | Description |
+| Field | What it is |
 |---|---|
-| `total_income` | Sum of all income records |
-| `total_expenses` | Sum of all expense records |
-| `net_balance` | `total_income` minus `total_expenses` |
-| `category_totals` | Total amount grouped by category name |
-| `recent_transactions` | The 5 most recent records by date |
-| `monthly_trends` | Income and expense totals broken down per month |
+| `total_income` | sum of all income records |
+| `total_expenses` | sum of all expense records |
+| `net_balance` | income minus expenses |
+| `category_totals` | total per category |
+| `recent_transactions` | the 5 most recent records |
+| `monthly_trends` | income and expense per month |
 
 ---
 
-## Validation Rules
+## Validation
 
-All incoming data is validated automatically by Pydantic before it reaches the database. Invalid requests are rejected immediately with a `422` response and a clear error message.
+Pydantic validates every request before it touches the database. Bad input gets a `422` with a clear message.
 
-| Rule | Detail |
-|---|---|
-| Amount must be positive | Zero and negative values are rejected |
-| Type must be `income` or `expense` | Any other string is rejected |
-| Role must be `viewer`, `analyst`, or `admin` | Any other string is rejected |
-| Username must be unique | Duplicate usernames return `400` |
-| Required fields must be present | Missing fields return `422` |
-| Date must be in `YYYY-MM-DD` format | Invalid dates return `422` |
+- Amount must be greater than zero
+- Type must be `income` or `expense`
+- Role must be `viewer`, `analyst`, or `admin`
+- Usernames must be unique
+- Dates must be in `YYYY-MM-DD` format
 
 ---
 
-## How the System Works
+## How it works under the hood
 
-### Request Lifecycle
-
-Every request follows this path from start to finish:
+Every request goes through this path:
 
 ```
-Client sends request
-        |
-        v
-FastAPI receives it and routes it (main.py)
-        |
-        v
-Pydantic validates the request body shape and types (schemas.py)
-        |
-        v
-Token is extracted from the Authorization header (dependencies.py)
-        |
-        v
-Token is looked up in the in-memory store (auth.py)
-        |
-        v
-User's role is checked against the route's requirement (dependencies.py)
-        |
-        v
-Route handler executes (routes/)
-        |
-        v
-CRUD function reads or writes to the database (crud.py)
-        |
-        v
-SQLAlchemy translates Python objects to SQL (database.py)
-        |
-        v
-SQLite executes the query (finance.db)
-        |
-        v
-Result is serialized through Pydantic response schema (schemas.py)
-        |
-        v
-JSON response returned to client
+Request comes in
+  → FastAPI routes it
+  → Pydantic validates the body
+  → Token is pulled from the Authorization header
+  → Token is looked up in memory to identify the user
+  → Role is checked against what the route requires
+  → Route handler runs
+  → CRUD function reads or writes to the database
+  → SQLAlchemy translates it to SQL
+  → SQLite executes it
+  → Response is shaped by Pydantic and returned as JSON
 ```
 
-### Password Security
+Passwords are hashed with SHA-256 before being stored. The original password is never saved anywhere. On login, the input is hashed and compared to the stored hash.
 
-Passwords are never stored as plain text. When a user is created, the password is run through SHA-256 — a one-way hashing algorithm — and only the hash is saved to the database. During login, the typed password is hashed again and compared to the stored hash. The original password cannot be recovered from the database under any circumstances.
+Tokens are random 64-character hex strings generated with Python's `secrets` module. They live in a server-side dictionary until the server restarts.
 
-### Token System
-
-When login succeeds, a cryptographically random 64-character hex string is generated using Python's `secrets` module. This token is stored in a server-side Python dictionary mapped to the user's ID and role. The client includes this token in every request header. The server looks it up to confirm identity and determine what the user is allowed to do.
-
-### Role-Based Access Control
-
-Every protected route has a role guard attached via FastAPI's `Depends()` system. The guard runs automatically before the route handler. If the user's role does not meet the requirement, the request is rejected with a `403 Access Denied` response before any database operation takes place.
+Role guards run automatically via FastAPI's `Depends()` system before any route logic executes. If the role doesn't match, the request is rejected with a `403` immediately.
 
 ---
 
-## Assumptions Made
+## Design decisions worth knowing
 
-These are the decisions made about how the system should behave where the requirements left room for interpretation:
+**Finance records aren't tied to a user.** Records exist at the system level. Any admin can create, edit, or delete any record.
 
-**1. Finance records are not tied to a specific user.**
-All records exist at the system level. Any admin can create, edit, or delete any record. There is no concept of "my records" vs "other people's records."
+**No self-registration.** Only admins can create accounts. This keeps access controlled in a finance context.
 
-**2. Only admins can create users.**
-There is no self-registration. All accounts are provisioned by an admin. This keeps access tightly controlled in a finance context.
+**Deactivation over deletion.** Setting `is_active` to `false` removes access without losing the user's history. It's reversible.
 
-**3. Deactivating a user is preferred over deleting them.**
-When an admin wants to remove someone's access, they set `is_active` to `false` rather than deleting the row. This preserves the user's history and makes the action reversible.
+**Categories are free text.** No predefined list. Admins can use any string. The tradeoff is that `Salary` and `salary` are treated as different categories in the dashboard.
 
-**4. Category is a free-text field.**
-There is no predefined list of categories. Admins can use any string — `salary`, `rent`, `freelance`, etc. This keeps the system flexible without needing a separate category management layer.
+**The dashboard has no date filter.** It always covers all records. Use the `/finance/` filters if you need a specific range.
 
-**5. The dashboard summary covers all records across all time.**
-There is no date filter on the summary endpoint. It always returns totals for the entire dataset. Filtering is available on the `/finance/` list endpoint instead.
+**Tokens don't expire.** They're cleared on server restart. Simple enough for development, but you'd want proper expiry in production.
 
-**6. Tokens do not expire.**
-A token remains valid until the server restarts or `revoke_token()` is called. There is no automatic expiry time. This was chosen for simplicity in a development context.
+**SQLite over PostgreSQL.** Zero config, single file, works immediately. Not suitable for high concurrency or multi-server deployments. Switching to PostgreSQL later only requires changing `DATABASE_URL` in `database.py`.
 
-**7. The default admin password is hardcoded for first-run convenience.**
-The `admin` / `admin123` account is seeded automatically so the system is usable immediately without any manual setup. It is expected to be changed before any real use.
+**SHA-256 over bcrypt.** Built into Python, no extra dependencies. The tradeoff is it's faster than ideal for password hashing. For production, swap it out for `bcrypt` or `passlib`.
 
----
+**No pagination.** List endpoints return everything. Fine for small datasets, but you'd want `limit` and `offset` params before scaling up.
 
-## Tradeoffs Considered
-
-These are the deliberate tradeoffs made in the design, along with the reasoning behind each choice:
-
----
-
-**SQLite over PostgreSQL or MySQL**
-
-SQLite was chosen because it requires zero configuration — no server to install, no connection string to manage, no credentials. The entire database is a single file. For a project of this scope and for local development, this is the right call. The tradeoff is that SQLite does not handle high concurrency well and is not suitable for a multi-server production deployment. Switching to PostgreSQL later would only require changing the `DATABASE_URL` in `database.py` — the rest of the code stays the same because SQLAlchemy abstracts the database layer.
-
----
-
-**In-memory token store over JWT or a database-backed session**
-
-Tokens are stored in a Python dictionary in server memory. This is simple, fast, and easy to reason about. The tradeoff is that all tokens are lost when the server restarts, which means every user has to log in again. It also means the system cannot scale horizontally — if you run two server instances, a token issued by one would not be recognised by the other. JWT (JSON Web Tokens) would solve both problems because the token itself contains the user's data and does not need to be looked up anywhere. JWT was not used here to keep the auth system simple and transparent.
-
----
-
-**SHA-256 for password hashing over bcrypt**
-
-SHA-256 is fast and built into Python's standard library with no extra dependencies. The tradeoff is that it is not designed for password hashing — it is too fast, which makes it easier to brute-force with a large list of guesses. bcrypt is the industry standard for passwords because it is intentionally slow and includes a salt automatically. For a production system, replacing `hashlib.sha256` with `bcrypt` or `passlib` would be the right move.
-
----
-
-**No pagination on list endpoints**
-
-`GET /finance/` and `GET /users/` return all matching records in a single response. This is fine for small datasets but would become a performance problem with thousands of records. Adding `limit` and `offset` query parameters to support pagination would be a straightforward improvement.
-
----
-
-**No logout endpoint**
-
-The `revoke_token()` function exists in `auth.py` but there is no route that calls it. This means tokens cannot be explicitly invalidated — they just disappear when the server restarts. Adding a `POST /users/logout` endpoint that calls `revoke_token()` would complete the auth lifecycle properly.
-
----
-
-**Free-text category field over a managed category table**
-
-Categories are plain strings rather than foreign keys to a separate `categories` table. This makes creating records simpler and avoids the need to pre-populate categories before using the system. The tradeoff is that there is no enforcement of consistent naming — `Salary`, `salary`, and `SALARY` would be treated as three different categories in the dashboard summary. A normalised category table would prevent this.
+**No logout endpoint.** `revoke_token()` exists in `auth.py` but there's no route wired to it yet. Tokens just disappear on restart.
