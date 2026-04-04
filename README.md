@@ -19,7 +19,7 @@ It handles user management, financial record tracking, role-based access, and a 
 - Uvicorn 0.29.0
 - SQLAlchemy 2.0.30
 - Pydantic 2.7.1
-- SQLite (built-in, no setup needed)
+- SQLite 
 
 ---
 
@@ -52,7 +52,7 @@ finance_dashboard_backend/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/finance_dashboard_backend.git
+git clone https://github.com/abhignarachuri/finance_dashboard_backend.git
 cd finance_dashboard_backend
 ```
 
